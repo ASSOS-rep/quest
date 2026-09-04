@@ -252,13 +252,19 @@
     <div class="lvl-head"><span class="lvl-badge">LEVEL 1 ✓</span>
       <span class="lvl-title">Mission complete!</span></div>
     <div id="rewardsL1"></div>
+    <button class="btn gold" onclick="goL1next()" style="margin-top:14px;">Συνέχεια ▸</button>
+  </div>
+
+  <div class="card hidden" id="scrL1next">
+    <div class="lvl-head"><span class="lvl-badge">LEVEL 2</span>
+      <span class="lvl-title">Το επόμενο βήμα</span></div>
     <div id="cdBlock">
-      <p class="bright" style="margin-top:18px;">🔒 Το <strong>LEVEL 2</strong> κρύβει το επόμενο δώρο. Ξεκλειδώνει σε:</p>
+      <p class="bright" style="margin-top:6px;">🔒 Το <strong>LEVEL 2</strong> κρύβει το επόμενο δώρο. Ξεκλειδώνει σε:</p>
       <div class="count" id="cd1">--:--:--</div>
       <div class="count-sub">Κράτα την κάρτα. Ξανασκάναρέ την όταν μηδενίσει.</div>
     </div>
     <div id="goBlock" class="hidden">
-      <p class="bright" style="margin-top:18px;">⚡ Το <strong>LEVEL 2</strong> κρύβει το επόμενο δώρο — και είναι ήδη ξεκλείδωτο.</p>
+      <p class="bright" style="margin-top:6px;">⚡ Το <strong>LEVEL 2</strong> κρύβει το επόμενο δώρο — και είναι ήδη ξεκλείδωτο.</p>
       <button class="btn" onclick="enterL2()">Συνέχισε στο LEVEL 2 →</button>
     </div>
   </div>
@@ -277,7 +283,13 @@
     <div class="lvl-head"><span class="lvl-badge">LEVEL 2 ✓</span>
       <span class="lvl-title">Level up!</span></div>
     <div id="rewardsL2"></div>
-    <p class="bright" style="margin-top:18px;">⚡ Το <strong>FINAL LEVEL</strong> κρύβει το μεγαλύτερο δώρο του quest.</p>
+    <button class="btn gold" onclick="goL2next()" style="margin-top:14px;">Συνέχεια ▸</button>
+  </div>
+
+  <div class="card hidden" id="scrL2next">
+    <div class="lvl-head"><span class="lvl-badge">FINAL</span>
+      <span class="lvl-title">Το μεγάλο φινάλε</span></div>
+    <p class="bright" style="margin-top:6px;">⚡ Το <strong>FINAL LEVEL</strong> κρύβει το μεγαλύτερο δώρο του quest.</p>
     <button class="btn gold" onclick="enterL3()">Άνοιξε το FINAL LEVEL →</button>
   </div>
 
@@ -310,15 +322,20 @@
   <div class="card hidden" id="scrDone">
     <div class="lvl-head"><span class="lvl-badge">QUEST ✓</span>
       <span class="lvl-title">Τα λέμε στα ASSOS!</span></div>
-    <p class="bright">Το έπαθλό σου είναι κλειδωμένο στο όνομά σου — θα σε καλέσουμε. Έλα με αυτή την οθόνη στο κινητό σου — αυτή είναι το εισιτήριό σου.</p>
     <p class="bright" style="margin-top:4px;">Κλειδωμένο στο όνομα: <strong id="fWho"></strong></p>
     <div class="code" id="discCode" style="margin:10px auto;">ASSOS-XX</div>
-    <div class="pickup">📍 Μην ξεχάσεις: <strong>η οθόνη με το όνομά σου είναι το εισιτήριο</strong>. Έλα έως <span class="dl2"></span> για να παραλάβεις το έπαθλό σου — και η προσωπική σου έκπτωση <strong id="doneCode"></strong> σε περιμένει στη γραμματεία.<br><span id="addrLine"></span></div>
-    <p style="margin-top:14px;font-size:12.5px;"><strong>Άλλαξες γνώμη;</strong> Το δώρο ισχύει για όποιο πρόγραμμα διαλέξεις τελικά — γλώσσα ή πληροφορική. Το αποφασίζεις στη γραμματεία.</p>
-    <button class="btn share" onclick="shareQuest()" style="margin-top:10px;">📤 Στείλ' το στην παρέα</button>
-    <p class="keepline" style="margin-top:12px;">👥 Ξέρεις κάποιον που θα το ήθελε; Στείλ' του το quest — παίζει στο δικό του κινητό, με το δικό του όνομα.</p>
-    <a class="btn" href="#" target="_blank" rel="noopener" data-site style="margin-top:14px;font-size:19px;font-weight:800;">🌐 Δες το site των ASSOS</a>
-    <button class="btn share" onclick="confirmReset()" style="margin-top:14px;">🔁 Παίξε ξανά — νέο quest</button>
+    <div class="pickup">📍 <strong>Αυτή η οθόνη είναι το εισιτήριό σου.</strong> Έλα με αυτήν στα ASSOS έως <span class="dl2"></span> να παραλάβεις το έπαθλό σου — η έκπτωση <strong id="doneCode"></strong> σε περιμένει στη γραμματεία. Θα σε καλέσουμε κι εμείς.<br><span id="addrLine"></span></div>
+    <p style="margin-top:12px;font-size:12.5px;"><strong>Άλλαξες γνώμη;</strong> Το δώρο ισχύει για όποιο πρόγραμμα διαλέξεις τελικά — γλώσσα ή πληροφορική.</p>
+    <button class="btn gold" onclick="goDone2()" style="margin-top:12px;">Συνέχεια ▸</button>
+  </div>
+
+  <div class="card hidden" id="scrDone2">
+    <div class="lvl-head"><span class="lvl-badge">📤</span>
+      <span class="lvl-title">Πριν φύγεις…</span></div>
+    <p class="keepline" style="margin-top:6px;">👥 Ξέρεις κάποιον που θα το ήθελε; Στείλ' του το quest — παίζει στο δικό του κινητό, με το δικό του όνομα.</p>
+    <button class="btn share" onclick="shareQuest()" style="margin-top:12px;">📤 Στείλ' το στην παρέα</button>
+    <a class="btn" href="#" target="_blank" rel="noopener" data-site style="margin-top:12px;font-size:19px;font-weight:800;">🌐 Δες το site των ASSOS</a>
+    <button class="btn share" onclick="confirmReset()" style="margin-top:12px;">🔁 Παίξε ξανά — νέο quest</button>
     <p style="margin-top:8px;font-size:11px;color:var(--muted);font-weight:700;text-align:center;">Για σένα ή για φίλο στο ίδιο κινητό — όσες φορές θες.</p>
   </div>
 
@@ -707,7 +724,7 @@ function show(id){
   ["tag","deadline","keepline"].forEach(function(c){
     var e=document.querySelector("."+c); if(e){e.style.display=(id==="scrWelcome")?"":"none";}
   });
-  ["scrWelcome","scrStart","scrL1","scrGate","scrWhen","scrL1win","scrL2","scrL2win","scrL3","scrL3b","scrDone","scrExpired"].forEach(function(s){
+  ["scrWelcome","scrStart","scrL1","scrGate","scrWhen","scrL1win","scrL1next","scrL2","scrL2win","scrL2next","scrL3","scrL3b","scrDone","scrDone2","scrExpired"].forEach(function(s){
     document.getElementById(s).classList.add("hidden");
   });
   document.getElementById(id).classList.remove("hidden");
@@ -795,15 +812,19 @@ function goBack(){
   if(CUR==="scrL2"){
     var i=state.l2idx||0;
     if(i>0){state.l2idx=i-1;save();renderL2();return;}
-    show("scrL1win");return;
+    show("scrL1next");return;
   }
   if(CUR==="scrL2win"){
     state.l2idx=l2items().length-1;save();renderL2();show("scrL2");return;
   }
   var P={scrStart:"scrWelcome",scrL1:"scrStart",scrWhen:"scrL1",scrGate:"scrWhen",
-         scrL1win:"scrGate",scrL3:"scrL2win",scrL3b:"scrL3",scrDone:"scrL3b"};
+         scrL1win:"scrGate",scrL1next:"scrL1win",scrL2win:"scrL2",scrL2next:"scrL2win",
+         scrL3:"scrL2next",scrL3b:"scrL3",scrDone:"scrL3b",scrDone2:"scrDone"};
   if(P[CUR]){ if(P[CUR]==="scrL1"){renderL1();} show(P[CUR]); setProgress(); }
 }
+function goL1next(){ show("scrL1next"); setProgress(); }
+function goL2next(){ show("scrL2next"); setProgress(); }
+function goDone2(){ show("scrDone2"); }
 function goStart(){ state.welcomed=1; save(); route(); }
 function startQuest(){
   if(!sel().length){
