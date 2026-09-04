@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASSOS QUEST — Scan. Play. Win.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Nunito:wght@400;600;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<!--
+  ═══════════════════════════════════════════════════════════════
+  ASSOS QUEST — ΡΥΘΜΙΣΕΙΣ ΔΙΑΧΕΙΡΙΣΤΗ
+  Άλλαξε ΜΟΝΟ τις τιμές στο CONFIG (στην αρχή του <script>):
+  - EMAIL / PHONE / ADDRESS του φροντιστηρίου
+  - DEADLINE: πότε λήγει το quest (μορφή: "2026-09-30")
+  - CV_EBOOK_URL / INTERVIEW_EBOOK_URL: links στα PDF σου
+  - DISCOUNT_CODE: κωδικός έκπτωσης του Level 2
+  - UNLOCK_HOURS: ώρες μέχρι να ξεκλειδώσει το Level 2 (π.χ. 48)
+  ΔΟΚΙΜΕΣ: άνοιξε τη σελίδα ως ...html?test  → χωρίς αναμονή
+           άνοιξε τη σελίδα ως ...html?reset → μηδενίζει την πρόοδο
+  ΜΙΑ ΣΥΜΜΕΤΟΧΗ ΑΝΑ ΣΥΣΚΕΥΗ: δεν υπάρχει κουμπί επανεκκίνησης για τον χρήστη.
+  Διπλές κρατήσεις (ίδιο τηλέφωνο) φιλτράρονται από τη γραμματεία στο Sheet.
+  Οι ερωτήσεις αλλάζουν στο μπλοκ BANK.
+  Η πρόοδος αποθηκεύεται στη συσκευή του χρήστη (localStorage) —
+  η σελίδα πρέπει να φιλοξενηθεί στο URL που θα γράφει το QR.
+  ═══════════════════════════════════════════════════════════════
+-->
+<style>
+  :root{
+    --navy:#002060; --navy2:#001238; --cobalt:#0458A8;
+    --iris1:#39D2FF; --iris2:#B36BFF; --iris3:#FF7AC6;
+    --gold:#F5B301; --ok:#2ED573; --bad:#FF6B81;
+    --card:#0A1A46; --line:#1B2C63; --txt:#EAF0FC; --muted:#8FA3CF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{
+    font-family:'Nunito',sans-serif;color:var(--txt);
+    background:radial-gradient(120% 90% at 80% -10%, #0A3B8C 0%, transparent 55%), var(--navy2);
+    min-height:100vh;padding:20px 16px 60px;
+  }
+  .wrap{max-width:440px;margin:0 auto;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;align-items:center;
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.22em;
+    color:#7FA8DF;text-transform:uppercase;margin-bottom:22px;}
+  h1.logo{margin-top:6px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:34px;
+    line-height:1;letter-spacing:-0.02em;margin-bottom:6px;}
+  h1.logo span{background:linear-gradient(92deg,var(--iris1),var(--iris2) 55%,var(--iris3));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .tag{color:var(--muted);font-size:14px;font-weight:600;margin-bottom:12px;}
+  .brandlogo{width:118px;height:auto;flex:0 0 auto;filter:drop-shadow(0 3px 10px rgba(0,0,0,.4));}
+  .consent{display:flex;gap:9px;align-items:flex-start;font-size:11.5px;line-height:1.45;color:#C9D2F0;
+    margin:12px 0 6px;text-transform:none;letter-spacing:0;font-family:'Nunito',sans-serif;font-weight:600;}
+  .consent input{width:auto;margin:3px 0 0;flex:0 0 auto;transform:scale(1.25);}
+  .keepline{text-align:center;font-size:11.5px;font-weight:800;color:var(--iris1);
+    margin:8px auto 0;max-width:340px;line-height:1.45;}
+  .deadline{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;
+    letter-spacing:.12em;color:var(--gold);border:1px solid rgba(245,179,1,.45);
+    background:rgba(245,179,1,.08);border-radius:99px;padding:6px 14px;margin-bottom:22px;}
+  .progress{display:flex;gap:8px;margin-bottom:26px;}
+  .p-step{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.12);position:relative;overflow:hidden;}
+  .p-step.done::after{content:"";position:absolute;inset:0;border-radius:99px;
+    background:linear-gradient(90deg,var(--iris1),var(--iris2));}
+  .p-step.now::after{content:"";position:absolute;inset:0;border-radius:99px;
+    background:var(--gold);animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+  .p-labels{display:flex;gap:8px;margin:-18px 0 26px;}
+  .p-labels span{flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;
+    font-size:9px;letter-spacing:.15em;color:#5B6E9E;text-transform:uppercase;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:22px;margin-bottom:16px;}
+  .lvl-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .lvl-badge{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;
+    letter-spacing:.1em;color:var(--navy);background:var(--gold);
+    padding:4px 10px;border-radius:8px;}
+  .lvl-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;}
+  .card p{font-size:14.5px;line-height:1.55;color:var(--muted);font-weight:600;}
+  .card p.bright{color:var(--txt);}
+  .mystery{display:flex;gap:10px;margin:14px 0 18px;}
+  .m-box{flex:1;text-align:center;border:1.5px dashed var(--line);border-radius:12px;
+    padding:14px 6px;}
+  .m-box .mi{font-size:26px;}
+  .m-box .ml{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;
+    color:#5B6E9E;text-transform:uppercase;margin-top:6px;}
+  .m-box.big{border-color:rgba(245,179,1,.5);}
+  .m-box.big .ml{color:var(--gold);}
+  .q{font-size:16.5px;font-weight:800;color:var(--txt);margin:16px 0 14px;line-height:1.4;}
+  .opt{display:block;width:100%;text-align:left;font-family:'Nunito',sans-serif;
+    font-size:15px;font-weight:700;color:var(--txt);
+    background:rgba(255,255,255,.06);border:1.5px solid var(--line);
+    border-radius:12px;padding:13px 15px;margin-bottom:10px;cursor:pointer;
+    transition:border-color .15s, background .15s;}
+  .opt:active{background:rgba(255,255,255,.12);}
+  .opt.ok{border-color:var(--ok);background:rgba(46,213,115,.12);}
+  .opt.bad{border-color:var(--bad);background:rgba(255,107,129,.12);}
+  .btn{display:inline-block;width:100%;text-align:center;font-family:'Space Grotesk',sans-serif;
+    font-weight:700;font-size:16px;color:var(--navy);text-decoration:none;
+    background:linear-gradient(92deg,var(--iris1),var(--iris2));
+    border:none;border-radius:12px;padding:15px 18px;cursor:pointer;margin-top:8px;}
+  .btn.gold{background:var(--gold);}
+  .btn.ghost{background:transparent;color:var(--muted);border:1.5px solid var(--line);font-size:14px;}
+  .reward{border:1.5px dashed var(--iris2);border-radius:14px;padding:16px;margin-top:16px;}
+  .reward .r-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;
+    letter-spacing:.2em;color:var(--iris1);text-transform:uppercase;margin-bottom:6px;}
+  .reward .r-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;margin-bottom:4px;}
+  .reward p{font-size:13.5px;}
+  .code{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;
+    letter-spacing:.18em;color:var(--gold);background:rgba(245,179,1,.1);
+    border:1px solid rgba(245,179,1,.4);border-radius:10px;
+    padding:10px 14px;text-align:center;margin:10px 0;}
+  .voucher{margin-top:12px;border-radius:14px;padding:16px;position:relative;overflow:hidden;
+    background:linear-gradient(135deg,rgba(57,210,255,.14),rgba(179,107,255,.14) 55%,rgba(255,122,198,.14));
+    border:1.5px solid rgba(179,107,255,.55);}
+  .voucher::before,.voucher::after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;
+    background:var(--card);top:50%;transform:translateY(-50%);}
+  .voucher::before{left:-11px;} .voucher::after{right:-11px;}
+  .v-top{display:flex;justify-content:space-between;align-items:center;}
+  .v-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--iris1);text-transform:uppercase;}
+  .v-player{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:var(--muted);}
+  .v-pct{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:88px;line-height:.95;margin-top:10px;letter-spacing:-.03em;
+    filter:drop-shadow(0 6px 22px rgba(179,107,255,.45));
+    background:linear-gradient(92deg,var(--iris1),var(--iris2) 55%,var(--iris3));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .v-what{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;color:#C9D2F0;margin-top:6px;}
+  .v-foot{font-size:9.5px;font-weight:700;color:var(--muted);line-height:1.4;margin-top:6px;}
+  .count{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;
+    color:var(--txt);text-align:center;letter-spacing:.1em;margin:14px 0 4px;}
+  .count-sub{text-align:center;font-size:12.5px;color:var(--muted);font-weight:600;}
+  .pickup{border:1px solid rgba(245,179,1,.45);background:rgba(245,179,1,.08);
+    border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13.5px;
+    font-weight:700;color:var(--txt);line-height:1.5;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px;}
+  .chip{font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:var(--txt);
+    background:rgba(255,255,255,.06);border:1.5px solid var(--line);
+    border-radius:99px;padding:9px 15px;cursor:pointer;transition:all .15s;}
+  .chip-break{flex-basis:100%;height:0;}
+  .chips{justify-content:center;}
+  .chip.it{border-color:#0D9488;color:#5EEAD4;}
+  .chip.it.sel{background:linear-gradient(135deg,#0D9488,#14B8A6);border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(13,148,136,.45);}
+  .chip.sel{background:linear-gradient(92deg,var(--iris1),var(--iris2));
+    color:var(--navy);border-color:transparent;}
+  .msg{font-size:14px;font-weight:700;margin-top:10px;}
+  .msg.ok{color:var(--ok);} .msg.bad{color:var(--bad);}
+  input,select{width:100%;font-family:'Nunito',sans-serif;font-size:15px;font-weight:600;
+    color:var(--txt);background:rgba(255,255,255,.06);border:1.5px solid var(--line);
+    border-radius:12px;padding:13px 15px;margin-bottom:10px;outline:none;}
+  input::placeholder{color:#5B6E9E;}
+  select{appearance:none;}
+  option{color:#0B1230;}
+  label{font-size:12.5px;font-weight:800;color:var(--muted);display:block;
+    margin:6px 0 6px 2px;text-transform:uppercase;letter-spacing:.06em;}
+  .foot{margin-top:30px;text-align:center;font-family:'IBM Plex Mono',monospace;
+    font-size:10px;letter-spacing:.18em;color:#5B6E9E;text-transform:uppercase;line-height:2;}
+  .hidden{display:none;}
+  .shake{animation:shake .4s;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .confetti{position:fixed;top:-10px;font-size:20px;animation:fall linear forwards;pointer-events:none;z-index:99;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:.2}}
+.keepnote{font-size:11px;color:var(--muted);font-weight:700;margin-top:8px;line-height:1.45}
+.btn.share{background:linear-gradient(92deg,#F5B301,#FFD34D);color:#002060;border:none;
+  box-shadow:0 6px 22px rgba(245,179,1,.5)}
+.btn.share:active{transform:scale(.98)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><span>ASSOS QUEST · <span id="cardTag" class="qno"></span></span><img class="brandlogo" src="data:image/png;base64,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" alt="ASSOS"></div>
+  <h1 class="logo">KEEP ME.<br><span>I CHANGE.</span></h1>
+  <p class="tag">Κάθε level ξεκλειδώνει νέο δώρο. Παίξε τα τώρα — και έλα σήμερα να τα παραλάβεις.</p>
+  <div class="deadline">⏳ Το <strong class="qord"></strong> λήγει <span id="dlText"></span></div>
+  <div class="keepline">👥 Μία κάρτα, όλη η παρέα: ο καθένας σκανάρει με το δικό του κινητό και παίζει το δικό του quest.</div>
+
+  <div class="progress">
+    <div class="p-step" id="p1"></div>
+    <div class="p-step" id="p2"></div>
+    <div class="p-step" id="p3"></div>
+  </div>
+  <div class="p-labels"><span>Level 1</span><span>Level 2</span><span>Level 3</span></div>
+
+  <!-- ═══════ ΕΝΑΡΞΗ ═══════ -->
+  <a id="backBtn" href="#" onclick="goBack();return false;" class="hidden"
+     style="display:inline-block;margin:0 0 8px 4px;font-family:'IBM Plex Mono',monospace;font-size:11px;
+     letter-spacing:.15em;color:#A8C6F0;text-decoration:none;font-weight:500;">‹ ΠΙΣΩ</a>
+  <div class="card" id="scrWelcome" style="text-align:center;">
+    <button class="btn gold" onclick="goStart()" style="font-size:20px;">ΠΑΜΕ ▸</button>
+    <p style="margin-top:12px;font-size:12.5px;"><strong>Το quest και τα δώρα του αφορούν μόνο νέους σπουδαστές.</strong></p>
+  </div>
+
+  <div class="card hidden" id="scrStart">
+    <div class="lvl-head"><span class="lvl-badge">START</span>
+      <span class="lvl-title">Η αποστολή ξεκινά</span></div>
+    <p class="bright">3 levels. 3 κρυφά δώρα. Δεν θα σου πούμε ποια — θα τα ανακαλύψεις παίζοντας.</p>
+    <div class="mystery">
+      <div class="m-box"><div class="mi">🎁</div><div class="ml">Level 1</div></div>
+      <div class="m-box"><div class="mi">🎁</div><div class="ml">Level 2</div></div>
+      <div class="m-box big"><div class="mi">❓</div><div class="ml">Final</div></div>
+    </div>
+    <p class="bright">Διάλεξε την αποστολή σου:</p>
+    <div class="chips" id="chips"></div>
+    <p style="margin:-6px 0 14px;font-size:12px;"><strong>Διάλεξε ένα</strong> — οι ερωτήσεις, τα δώρα και η έκπτωση προσαρμόζονται σε αυτό. Την τελική επιλογή την κάνεις στη γραμματεία — το δώρο ισχύει για όποιο πρόγραμμα διαλέξεις τελικά.</p>
+    <button class="btn" onclick="startQuest()">Ξεκίνα το LEVEL 1</button>
+  </div>
+
+  <!-- ═══════ LEVEL 1 ═══════ -->
+  <div class="card hidden" id="scrL1">
+    <div class="lvl-head"><span class="lvl-badge">LEVEL 1</span>
+      <span class="lvl-title">Solve the riddle</span></div>
+    <p>Μία ερώτηση πάνω σε αυτό που διάλεξες. Θέλει σκέψη, όχι γνώσεις — και έχεις όσες προσπάθειες θες.</p>
+    <div class="q" id="q1text"></div>
+    <div id="q1"></div>
+    <div class="msg hidden" id="msg1"></div>
+  </div>
+
+
+  <div class="card hidden" id="scrGate">
+    <div class="lvl-head"><span class="lvl-badge">🔒</span>
+      <span class="lvl-title">Ξεκλείδωσε τα δώρα σου</span></div>
+    <p class="bright">Τα έλυσες! Για να ξεκλειδώσεις το δώρο σου — και όλα τα επόμενα — πες μας ποιος είσαι. Μία φορά, 20 δευτερόλεπτα.</p>
+    <label for="gName">Ονοματεπώνυμο</label>
+    <input id="gName" placeholder="π.χ. Μαρία Παπαδοπούλου" autocomplete="name">
+    <label for="gPhone">Τηλέφωνο</label>
+    <input id="gPhone" inputmode="tel" placeholder="π.χ. 69XXXXXXXX" autocomplete="tel">
+    <label for="gEmail">Email</label>
+    <input id="gEmail" type="email" placeholder="you@email.com" autocomplete="email">
+    <label class="consent" for="gConsent"><input type="checkbox" id="gConsent"> <span>Συναινώ στην επεξεργασία των στοιχείων μου από τα ASSOS για την επικοινωνία σχετικά με το ASSOS QUEST και τα προγράμματα των ASSOS. Διατήρηση έως 12 μήνες.</span></label>
+    <div style="margin-top:6px;"><a href="#" onclick="var g=document.getElementById('gdprBox');g.classList.toggle('hidden');return false;" style="font-size:11.5px;color:var(--muted);font-weight:800;">📄 Δες αναλυτικά πώς επεξεργαζόμαστε τα στοιχεία σου (GDPR)</a></div>
+    <div id="gdprBox" class="hidden" style="margin-top:8px;max-height:240px;overflow:auto;background:rgba(255,255,255,.05);border:1px solid rgba(168,198,240,.25);border-radius:12px;padding:12px 14px;font-size:11.5px;line-height:1.55;color:#C7D2EE;font-weight:600;text-align:left;">
+      <b style="color:#fff;">Επεξεργασία προσωπικών δεδομένων — ASSOS QUEST</b><br>
+      <b>Υπεύθυνος επεξεργασίας:</b> Κ. Ευθυμίου &amp; ΣΙΑ Ο.Ε. (τα ASSOS), Εγνατίας 144, 546 22 Θεσσαλονίκη · assoslingua@gmail.com · 2310 235 777.<br>
+      <b>Ποια στοιχεία:</b> ονοματεπώνυμο, τηλέφωνο, email, ενδιαφέρον σπουδών, κωδικοί δώρων.<br>
+      <b>Σκοπός:</b> επικοινωνία για τη συμμετοχή σου στο ASSOS QUEST (παράδοση δώρων/επάθλου) και ενημέρωση για τα προγράμματα και τις υπηρεσίες των ASSOS.<br>
+      <b>Νομική βάση:</b> η συγκατάθεσή σου.<br>
+      <b>Διατήρηση:</b> έως 12 μήνες από την τελευταία σου συμμετοχή ή επικοινωνία — εκτός αν εγγραφείς σε πρόγραμμα, οπότε ισχύουν οι όροι της εγγραφής.<br>
+      <b>Αποδέκτες:</b> μόνο τα ASSOS. Καμία διαβίβαση σε τρίτους για διαφημιστικούς σκοπούς.<br>
+      <b>Τα δικαιώματά σου:</b> πρόσβαση, διόρθωση, διαγραφή, περιορισμός, εναντίωση — και <b>ανάκληση της συγκατάθεσης οποτεδήποτε</b>, με email στο assoslingua@gmail.com ή από τη γραμματεία. Η ανάκληση δεν επηρεάζει τη νομιμότητα της επεξεργασίας που έγινε πριν από αυτήν.<br>
+      <b>Καταγγελία:</b> Αρχή Προστασίας Δεδομένων Προσωπικού Χαρακτήρα — dpa.gr.
+    </div>
+    <button class="btn gold" onclick="submitGate()">🔓 Ξεκλείδωσε το δώρο μου</button>
+    <div class="msg hidden" id="msgGate"></div>
+  </div>
+  <div class="card hidden" id="scrWhen">
+    <div class="lvl-head"><span class="lvl-badge">🔓</span>
+      <span class="lvl-title">Πότε θα ήθελες να ξεκινήσεις;</span></div>
+    <div class="chips when" id="whenChips" style="margin-top:10px;">
+      <button class="chip" data-w="ΤΩΡΑ" onclick="pickWhen(this)">🔥 Τώρα — φέτος</button>
+      <button class="chip" data-w="ΙΑΝΟΥΑΡΙΟΣ" onclick="pickWhen(this)">📅 Από Ιανουάριο</button>
+      <button class="chip" data-w="ΠΑΙΖΩ" onclick="pickWhen(this)">👀 Απλώς παίζω</button>
+    </div>
+    <p style="font-size:11.5px;color:var(--muted);margin:8px 0 4px;">Ειλικρινά — δεν αλλάζει τα δώρα σου. Μας βοηθά μόνο να μη σε ενοχλήσουμε άσκοπα.</p>
+  </div>
+
+  <div class="card hidden" id="scrL1win">
+    <div class="lvl-head"><span class="lvl-badge">LEVEL 1 ✓</span>
+      <span class="lvl-title">Mission complete!</span></div>
+    <div id="rewardsL1"></div>
+    <div id="cdBlock">
+      <p class="bright" style="margin-top:18px;">🔒 Το <strong>LEVEL 2</strong> κρύβει το επόμενο δώρο. Ξεκλειδώνει σε:</p>
+      <div class="count" id="cd1">--:--:--</div>
+      <div class="count-sub">Κράτα την κάρτα. Ξανασκάναρέ την όταν μηδενίσει.</div>
+    </div>
+    <div id="goBlock" class="hidden">
+      <p class="bright" style="margin-top:18px;">⚡ Το <strong>LEVEL 2</strong> κρύβει το επόμενο δώρο — και είναι ήδη ξεκλείδωτο.</p>
+      <button class="btn" onclick="enterL2()">Συνέχισε στο LEVEL 2 →</button>
+    </div>
+  </div>
+
+  <!-- ═══════ LEVEL 2 ═══════ -->
+  <div class="card hidden" id="scrL2">
+    <div class="lvl-head"><span class="lvl-badge">LEVEL 2</span>
+      <span class="lvl-title">Triple challenge</span></div>
+    <p>Τρεις ερωτήσεις, μία τη φορά. Λύνονται με λογική — και έχεις όσες προσπάθειες χρειαστείς.</p>
+    <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;color:#A8C6F0;margin:0 0 6px;" id="l2counter"></p>
+    <div id="q2wrap"></div>
+    <div class="msg hidden" id="msg2"></div>
+  </div>
+
+  <div class="card hidden" id="scrL2win">
+    <div class="lvl-head"><span class="lvl-badge">LEVEL 2 ✓</span>
+      <span class="lvl-title">Level up!</span></div>
+    <div id="rewardsL2"></div>
+    <p class="bright" style="margin-top:18px;">⚡ Το <strong>FINAL LEVEL</strong> κρύβει το μεγαλύτερο δώρο του quest.</p>
+    <button class="btn gold" onclick="enterL3()">Άνοιξε το FINAL LEVEL →</button>
+  </div>
+
+  <!-- ═══════ LEVEL 3 ═══════ -->
+  <div class="card hidden" id="scrL3">
+    <div class="lvl-head"><span class="lvl-badge">FINAL</span>
+      <span class="lvl-title">The grand prize</span></div>
+    <div class="reward">
+      <div class="r-eyebrow">Το μεγάλο έπαθλο — αποκαλύφθηκε</div>
+      <div class="voucher" id="voucher" style="margin-top:8px;">
+        <div class="v-top"><span class="v-eyebrow">🏆 Το μεγάλο σου δώρο</span><span class="v-player qno"></span></div>
+        <div class="v-pct" id="vPct">-15%</div>
+        <div class="v-what" id="vWhat">στα τμήματα Αγγλικών</div>
+        <div class="v-foot"><span id="vTerms"></span></div>
+      </div>
+      <p id="g3desc" style="margin-top:10px;font-size:12.5px;">🎁 Και μαζί: <strong id="g3name">δοκιμαστικό μάθημα</strong></p>
+    </div>
+    <button class="btn gold" onclick="goL3b()" style="margin-top:14px;">Συνέχισε ▸</button>
+  </div>
+
+  <div class="card hidden" id="scrL3b">
+    <div class="lvl-head"><span class="lvl-badge">FINAL</span>
+      <span class="lvl-title">Τι σε ενδιαφέρει;</span></div>
+    <p style="font-size:12.5px;margin-bottom:6px;"><strong>Διάλεξε ένα</strong> — την τελική επιλογή την κάνεις στη γραμματεία. Το δώρο ισχύει για όποιο πρόγραμμα διαλέξεις τελικά, γλώσσα ή πληροφορική.</p>
+    <div class="chips" id="chips3" style="margin-top:4px;"></div>
+    <button class="btn gold" id="btnBook" onclick="bookTrial()">Κράτησε το έπαθλό μου</button>
+    <div class="msg hidden" id="msg3"></div>
+  </div>
+
+  <div class="card hidden" id="scrDone">
+    <div class="lvl-head"><span class="lvl-badge">QUEST ✓</span>
+      <span class="lvl-title">Τα λέμε στα ASSOS!</span></div>
+    <p class="bright">Το έπαθλό σου είναι κλειδωμένο στο όνομά σου — θα σε καλέσουμε. Έλα με αυτή την οθόνη στο κινητό σου — αυτή είναι το εισιτήριό σου.</p>
+    <p class="bright" style="margin-top:4px;">Κλειδωμένο στο όνομα: <strong id="fWho"></strong></p>
+    <div class="code" id="discCode" style="margin:10px auto;">ASSOS-XX</div>
+    <div class="pickup">📍 Μην ξεχάσεις: <strong>η οθόνη με το όνομά σου είναι το εισιτήριο</strong>. Έλα έως <span class="dl2"></span> για να παραλάβεις το έπαθλό σου — και η προσωπική σου έκπτωση <strong id="doneCode"></strong> σε περιμένει στη γραμματεία.<br><span id="addrLine"></span></div>
+    <p style="margin-top:14px;font-size:12.5px;"><strong>Άλλαξες γνώμη;</strong> Το δώρο ισχύει για όποιο πρόγραμμα διαλέξεις τελικά — γλώσσα ή πληροφορική. Το αποφασίζεις στη γραμματεία.</p>
+    <button class="btn share" onclick="shareQuest()" style="margin-top:10px;">📤 Στείλ' το στην παρέα</button>
+    <p class="keepline" style="margin-top:12px;">👥 Ξέρεις κάποιον που θα το ήθελε; Στείλ' του το quest — παίζει στο δικό του κινητό, με το δικό του όνομα.</p>
+    <a class="btn" href="#" target="_blank" rel="noopener" data-site style="margin-top:14px;font-size:19px;font-weight:800;">🌐 Δες το site των ASSOS</a>
+    <button class="btn share" onclick="confirmReset()" style="margin-top:14px;">🔁 Παίξε ξανά — νέο quest</button>
+    <p style="margin-top:8px;font-size:11px;color:var(--muted);font-weight:700;text-align:center;">Για σένα ή για φίλο στο ίδιο κινητό — όσες φορές θες.</p>
+  </div>
+
+  <!-- ═══════ ΛΗΞΗ QUEST ═══════ -->
+  <div class="card hidden" id="scrExpired">
+    <div class="lvl-head"><span class="lvl-badge" style="background:rgba(255,255,255,.14);color:var(--muted);">ΕΛΗΞΕ</span>
+      <span class="lvl-title">Το <span class="qord"></span> ολοκληρώθηκε</span></div>
+    <p class="bright">Πέρνα από τα ASSOS ή τηλεφώνησέ μας για ένα δωρεάν δοκιμαστικό.</p>
+    <button class="btn" onclick="callUs()" style="margin-top:14px;">📞 Κάλεσέ μας</button>
+    <a class="btn ghost" href="#" target="_blank" rel="noopener" data-site style="margin-top:10px;">🌐 Δες το site των ASSOS</a>
+  </div>
+
+  <div class="foot">ASSOS · ΚΕΝΤΡΑ ΞΕΝΩΝ ΓΛΩΣΣΩΝ · ΠΛΗΡΟΦΟΡΙΚΗ</div>
+</div>
+
+<script>
+/* ═══════════ CONFIG — ΑΛΛΑΞΕ ΑΥΤΑ ═══════════ */
+var CONFIG = {
+  EMAIL: "assoslingua@gmail.com",              // email γραμματείας (εκεί έρχονται οι κρατήσεις)
+  PHONE: "+302310235777",              // τηλέφωνο φροντιστηρίου
+  ADDRESS: "Εγνατίας 144, 546 22, Θεσσαλονίκη",
+  ADDRESS2: "Παράρτημα: Εγνατίας 116, 546 22, Θεσσαλονίκη",                         // προαιρετικά: διεύθυνση, π.χ. "Λ. Παπάγου 10, Ζωγράφου"
+  DEADLINE: "2026-09-25",              // πότε λήγει το quest (ΕΤΟΣ-ΜΗΝΑΣ-ΜΕΡΑ)
+  DISCOUNT_DEFAULT: { pct: "15%", code: "ASSOS-Q26" },   // αν λείπει το αντικείμενο από τη λίστα
+  DISCOUNTS: {                          // το μεγάλο δώρο ανά αντικείμενο: big = ο μεγάλος τίτλος, what = η γραμμή από κάτω, code = ο κωδικός
+    "Αγγλικά":     { big:"100€", what:"πίστωση στα δίδακτρα Αγγλικών", terms:"Η πίστωση των 100€ αφαιρείται από την τελευταία δόση, σε 8μηνο ομαδικό πρόγραμμα.", code:"ASSOS-EN26" },
+    "Γαλλικά":     { big:"100€", what:"πίστωση στα δίδακτρα Γαλλικών", terms:"Η πίστωση των 100€ αφαιρείται από την τελευταία δόση, σε 8μηνο ομαδικό πρόγραμμα.", code:"ASSOS-FR26" },
+    "Γερμανικά":   { big:"100€", what:"πίστωση στα δίδακτρα Γερμανικών", terms:"Η πίστωση των 100€ αφαιρείται από την τελευταία δόση, σε 8μηνο ομαδικό πρόγραμμα.", code:"ASSOS-DE26" },
+    "Ισπανικά":    { big:"100€", what:"πίστωση στα δίδακτρα Ισπανικών", terms:"Η πίστωση των 100€ αφαιρείται από την τελευταία δόση, σε 8μηνο ομαδικό πρόγραμμα.", code:"ASSOS-ES26" },
+    "Ιταλικά":     { big:"100€", what:"πίστωση στα δίδακτρα Ιταλικών", terms:"Η πίστωση των 100€ αφαιρείται από την τελευταία δόση, σε 8μηνο ομαδικό πρόγραμμα.", code:"ASSOS-IT26" },
+    "Ρωσικά":      { big:"100€", what:"πίστωση στα δίδακτρα Ρωσικών", terms:"Η πίστωση των 100€ αφαιρείται από την τελευταία δόση, σε 8μηνο ομαδικό πρόγραμμα.", code:"ASSOS-RU26" },
+    "Τουρκικά":    { big:"100€", what:"πίστωση στα δίδακτρα Τουρκικών", terms:"Η πίστωση των 100€ αφαιρείται από την τελευταία δόση, σε 8μηνο ομαδικό πρόγραμμα.", code:"ASSOS-TR26" },
+    "Κινεζικά":    { big:"100€", what:"πίστωση στα δίδακτρα Κινεζικών", terms:"Η πίστωση των 100€ αφαιρείται από την τελευταία δόση, σε 8μηνο ομαδικό πρόγραμμα.", code:"ASSOS-CN26" },
+    "Ολλανδικά":   { big:"100€", what:"πίστωση στα δίδακτρα Ολλανδικών", terms:"Η πίστωση των 100€ αφαιρείται από την τελευταία δόση, σε 8μηνο ομαδικό πρόγραμμα.", code:"ASSOS-NL26" },
+    "Πληροφορική": { big:"+20 ώρες", what:"επιπλέον online εκπαίδευσης", terms:"Οι 20 ώρες ενεργοποιούνται με την εγγραφή σου σε πρόγραμμα Πληροφορικής. Η πίστωση των 100€ στη γλώσσα αφαιρείται από την τελευταία δόση, σε 8μηνο ομαδικό πρόγραμμα, με ταυτόχρονη φοίτηση.", code:"ASSOS-IT-PC26" }
+  },
+  QUEST_NO: 1,                          // αριθμός quest — στα επόμενα γίνεται 2, 3...
+  UNLOCK_HOURS: 0,                     // 0 = το Level 2 ανοίγει αμέσως. Αν θες αναμονή, βάλε π.χ. 48
+  SITE_URL: "https://assos.edu.gr",
+  SITE_URL_IT: "",                     // link σελίδας Πληροφορικής στο site — αν οριστεί, όσοι δήλωσαν Πληροφορική πάνε κατευθείαν εκεί
+  PICKUP_DEADLINE: "2026-09-30",       // έως πότε παραλαμβάνονται τα έπαθλα  // κουμπί «Δες το site» στο τέλος
+  /* ΔΩΡΑ ΑΝΑ ΑΝΤΙΚΕΙΜΕΝΟ. Ό,τι λείπει → χρησιμοποιείται το DEFAULT.
+     Τα url είναι ΣΧΕΤΙΚΑ: τα αρχεία των ebooks ανεβαίνουν στον ίδιο φάκελο με το index.html — δεν χρειάζεται domain.
+     l1/l2: ψηφιακά δώρα (icon, name, desc, url = link για κατέβασμα, ή "" αν παραλαμβάνεται στα ASSOS)
+     l3: το μεγάλο έπαθλο (παραλαβή μόνο στα ASSOS). Παράδειγμα με 2 γλώσσες συμπληρωμένες — αντέγραψε το μοτίβο. */
+  REWARDS: {
+    DEFAULT: {
+      l1: { icon:"📘", name:"CV in English — Ebook", desc:"Ο πλήρης οδηγός για βιογραφικό στα αγγλικά που ξεχωρίζει.", url:"cv-ebook.html" },
+      l2: { icon:"🎤", name:"Ace the Interview — Ebook", desc:"Πώς να περάσεις κάθε συνέντευξη στα αγγλικά, βήμα-βήμα.", url:"interview.html" },
+      l3: { icon:"🎁", name:"δωρεάν δοκιμαστικό μάθημα", desc:"" }
+    },
+    "Γαλλικά":  { l1: { icon:"🇫🇷", name:"Survival French — 50 φράσεις", desc:"Καφές, δρόμος, ψώνια, SOS — με προφορά γραμμένη στα ελληνικά.", url:"fr-survival.html" },
+                  l2: { icon:"🎧", name:"Γαλλικά στα αυτιά σου", desc:"Podcasts, μουσική με την τεχνική των 3 ακροάσεων, και η ρουτίνα των 15 λεπτών.", url:"fr-audio.html" } },
+    "Γερμανικά":{ l1: { icon:"🇩🇪", name:"Survival German — 50 φράσεις", desc:"Καφές, δρόμος, ψώνια, SOS — με προφορά γραμμένη στα ελληνικά.", url:"de-survival.html" },
+                  l2: { icon:"🎧", name:"Γερμανικά στα αυτιά σου", desc:"Podcasts, μουσική με την τεχνική των 3 ακροάσεων, και η ρουτίνα των 15 λεπτών.", url:"de-audio.html" } },
+    "Ιταλικά":  { l1: { icon:"🇮🇹", name:"Survival Italian — 50 φράσεις", desc:"Καφές, δρόμος, ψώνια, SOS — με προφορά γραμμένη στα ελληνικά.", url:"it-survival.html" },
+                  l2: { icon:"🎧", name:"Ιταλικά στα αυτιά σου", desc:"Podcasts, μουσική με την τεχνική των 3 ακροάσεων, και η ρουτίνα των 15 λεπτών.", url:"it-audio.html" } },
+    "Ρωσικά":   { l1: { icon:"🇷🇺", name:"Survival Russian — 50 φράσεις", desc:"Κυριλλικά + προφορά γραμμένη στα ελληνικά. Καφές, δρόμος, ψώνια, SOS.", url:"ru-survival.html" },
+                  l2: { icon:"🎧", name:"Ρωσικά στα αυτιά σου", desc:"Podcasts, μουσική με την τεχνική των 3 ακροάσεων, και η ρουτίνα των 15 λεπτών.", url:"ru-audio.html" } },
+    "Τουρκικά": { l1: { icon:"🇹🇷", name:"Survival Turkish — 50 φράσεις", desc:"Καφές, δρόμος, ψώνια, SOS — με προφορά γραμμένη στα ελληνικά.", url:"tr-survival.html" },
+                  l2: { icon:"🎧", name:"Τουρκικά στα αυτιά σου", desc:"Podcasts, μουσική με την τεχνική των 3 ακροάσεων, και η ρουτίνα των 15 λεπτών.", url:"tr-audio.html" } },
+    "Κινεζικά": { l1: { icon:"🇨🇳", name:"Survival Chinese — 50 φράσεις", desc:"Χαρακτήρες + pinyin + προφορά στα ελληνικά. Καφές, δρόμος, ψώνια, SOS.", url:"cn-survival.html" },
+                  l2: { icon:"🎧", name:"Κινεζικά στα αυτιά σου", desc:"Podcasts, μουσική με την τεχνική των 3 ακροάσεων, και η ρουτίνα των 15 λεπτών.", url:"cn-audio.html" } },
+    "Ολλανδικά":{ l1: { icon:"🇳🇱", name:"Survival Dutch — 50 φράσεις", desc:"Καφές, δρόμος, ψώνια, SOS — με προφορά γραμμένη στα ελληνικά.", url:"nl-survival.html" },
+                  l2: { icon:"🎧", name:"Ολλανδικά στα αυτιά σου", desc:"Podcasts, μουσική με την τεχνική των 3 ακροάσεων, και η ρουτίνα των 15 λεπτών.", url:"nl-audio.html" } },
+    "Ισπανικά": {
+      l1: { icon:"🇪🇸", name:"Survival Spanish — 50 φράσεις για ταξίδι", desc:"Το mini ebook για να παραγγείλεις, να ρωτήσεις, να τα βγάλεις πέρα από την πρώτη μέρα.", url:"es-survival.html" },
+      l2: { icon:"🎧", name:"Playlist & podcast guide για Ισπανικά", desc:"Τι να ακούς για να «κολλήσει» η γλώσσα χωρίς κόπο.", url:"es-audio.html" },
+      l3: { icon:"🎁", name:"δωρεάν δοκιμαστικό μάθημα", desc:"" }
+    },
+    "Πληροφορική": {
+      l1: { icon:"💻", name:"Excel Cheat Sheet — οι 30 συντομεύσεις", desc:"Μία σελίδα που θα κολλήσεις δίπλα στην οθόνη σου.", url:"excel-cheatsheet.html" },
+      l2: { icon:"🤖", name:"AI για φοιτητές", desc:"8 εργαλεία που σώζουν το εξάμηνο + 10 έτοιμα prompts που αντιγράφεις με ένα πάτημα.", url:"ai-toolkit.html" },
+      l3: { icon:"🎁", name:"100€ πίστωση σε γλώσσα της επιλογής σου, με ταυτόχρονη φοίτηση — αφαιρείται από την τελευταία δόση, σε 8μηνο ομαδικό πρόγραμμα", desc:"" }
+    }
+  },
+  QUESTIONS_FILE: "questions.json",    // εξωτερικό αρχείο ερωτήσεων (ίδιος φάκελος). Κενό "" = μόνο οι ενσωματωμένες
+  GOOGLE_FORM: {                       // κράτηση μέσω Google Form (αν url κενό → mailto)
+    url: "https://docs.google.com/forms/d/e/1FAIpQLSfpXI7eJV3UQmZJSElZ8FKzozOI2TY-jWHkymxcg_W2-uRqVQ/viewform",
+    entries: { name:"entry.1904069592", phone:"entry.16450441", email:"entry.1305592719", interest:"entry.1829089658", codes:"entry.1521071191",
+               consent:"entry.395275428" },        // το πλαίσιο συγκατάθεσης της φόρμας
+    consentValue: "Συναινώ στην επεξεργασία των στοιχείων μου (ονοματεπώνυμο, τηλέφωνο, email, ενδιαφέρον σπουδών) από τα ASSOS, με σκοπό την επικοινωνία μαζί μου σχετικά με τη συμμετοχή μου στις ενέργειες ASSOS QUEST και την ενημέρωσή μου για τα προγράμματα και τις υπηρεσίες των ASSOS. Τα στοιχεία μου διατηρούνται το πολύ 12 μήνες από την τελευταία μου συμμετοχή ή επικοινωνία, εκτός αν εγγραφώ σε πρόγραμμα."  // το ακριβές κείμενο της επιλογής του checkbox
+  }
+};
+/* ═════════════════════════════════════════════ */
+
+var INTERESTS = ["Αγγλικά","Γαλλικά","Γερμανικά","Ισπανικά","Ιταλικά","Ρωσικά","Τουρκικά","Κινεζικά","Ολλανδικά","Πληροφορική"];
+
+/* Ερωτήσεις για ΟΛΟΥΣ — περιέργειας & λογικής, όχι γνώσεων.
+   Ο αρχάριος τις λύνει με σκέψη. Λάθος απάντηση = ξαναπροσπαθείς. */
+var BANK = {
+  "Αγγλικά": { l1: { q: "Πώς λες «Γεια» στα αγγλικά;", options: [
+    "Hello",
+    "Merci",
+    "Hola",
+    "Ciao"
+  ], correct: 0 },
+    l2: [
+      { q: "1. Το «Yes» σημαίνει...", options: [
+        "Ναι",
+        "Όχι",
+        "Ίσως",
+        "Ποτέ"
+      ], correct: 0 },
+      { q: "2. Σε ποια πόλη ζει η βασιλική οικογένεια της Αγγλίας;", options: [
+        "Λονδίνο",
+        "Παρίσι",
+        "Ρώμη",
+        "Μαδρίτη"
+      ], correct: 0 },
+      { q: "3. Το «Thank you» το λες όταν θες να πεις...", options: [
+        "Ευχαριστώ",
+        "Αντίο",
+        "Βοήθεια",
+        "Καλημέρα"
+      ], correct: 0 }
+    ] },
+  "Γαλλικά": { l1: { q: "Ποιο από αυτά είναι γαλλική λέξη που λέμε και στα ελληνικά;", options: [
+    "Μερσί",
+    "Γκράτσιε",
+    "Ντάνκε",
+    "Πλιζ"
+  ], correct: 0 },
+    l2: [
+      { q: "1. Ο Πύργος του Άιφελ βρίσκεται στο...", options: [
+        "Παρίσι",
+        "Λονδίνο",
+        "Βερολίνο",
+        "Τόκιο"
+      ], correct: 0 },
+      { q: "2. Το «κρουασάν» είναι λέξη...", options: [
+        "γαλλική",
+        "κινεζική",
+        "ρωσική",
+        "τουρκική"
+      ], correct: 0 },
+      { q: "3. «Bonjour» σημαίνει...", options: [
+        "Καλημέρα",
+        "Καληνύχτα",
+        "Αντίο",
+        "Συγγνώμη"
+      ], correct: 0 }
+    ] },
+  "Γερμανικά": { l1: { q: "Ποια χώρα είναι διάσημη για τα αυτοκίνητά της (BMW, Mercedes);", options: [
+    "Γερμανία",
+    "Ιταλία",
+    "Γαλλία",
+    "Ισπανία"
+  ], correct: 0 },
+    l2: [
+      { q: "1. Η πρωτεύουσα της Γερμανίας είναι το...", options: [
+        "Βερολίνο",
+        "Μόναχο",
+        "Αμβούργο",
+        "Παρίσι"
+      ], correct: 0 },
+      { q: "2. Το Oktoberfest είναι γιορτή της...", options: [
+        "Γερμανίας",
+        "Ρωσίας",
+        "Κίνας",
+        "Τουρκίας"
+      ], correct: 0 },
+      { q: "3. Το «Auto» στα γερμανικά σημαίνει...", options: [
+        "αυτοκίνητο",
+        "ποδήλατο",
+        "τρένο",
+        "αεροπλάνο"
+      ], correct: 0 }
+    ] },
+  "Ισπανικά": { l1: { q: "Πώς λες «Γεια» στα ισπανικά;", options: [
+    "Hola",
+    "Hello",
+    "Merci",
+    "Danke"
+  ], correct: 0 },
+    l2: [
+      { q: "1. Το φλαμένκο είναι χορός της...", options: [
+        "Ισπανίας",
+        "Γερμανίας",
+        "Ρωσίας",
+        "Ολλανδίας"
+      ], correct: 0 },
+      { q: "2. «Amigo» σημαίνει...", options: [
+        "φίλος",
+        "εχθρός",
+        "δάσκαλος",
+        "γείτονας"
+      ], correct: 0 },
+      { q: "3. Η paella είναι φαγητό με...", options: [
+        "ρύζι",
+        "σοκολάτα",
+        "ψωμί",
+        "τυρί"
+      ], correct: 0 }
+    ] },
+  "Ιταλικά": { l1: { q: "Πίτσα και μακαρόνια — ποια χώρα τα σκέφτηκε;", options: [
+    "Ιταλία",
+    "Αγγλία",
+    "Ρωσία",
+    "Κίνα"
+  ], correct: 0 },
+    l2: [
+      { q: "1. «Ciao» σημαίνει...", options: [
+        "Γεια",
+        "Ευχαριστώ",
+        "Συγγνώμη",
+        "Βοήθεια"
+      ], correct: 0 },
+      { q: "2. Η Ρώμη είναι η πρωτεύουσα της...", options: [
+        "Ιταλίας",
+        "Ισπανίας",
+        "Γαλλίας",
+        "Ελβετίας"
+      ], correct: 0 },
+      { q: "3. Το «espresso» είναι...", options: [
+        "καφές",
+        "τσάι",
+        "χυμός",
+        "νερό"
+      ], correct: 0 }
+    ] },
+  "Ρωσικά": { l1: { q: "Ποια χώρα είναι η μεγαλύτερη του κόσμου σε έκταση;", options: [
+    "Ρωσία",
+    "Ελλάδα",
+    "Ιταλία",
+    "Ολλανδία"
+  ], correct: 0 },
+    l2: [
+      { q: "1. Η πρωτεύουσα της Ρωσίας είναι η...", options: [
+        "Μόσχα",
+        "Αγία Πετρούπολη",
+        "Βαρσοβία",
+        "Πράγα"
+      ], correct: 0 },
+      { q: "2. Στη Ρωσία τον χειμώνα κάνει...", options: [
+        "πολύ κρύο",
+        "πολλή ζέστη",
+        "πάντα 25°C",
+        "ποτέ κρύο"
+      ], correct: 0 },
+      { q: "3. Τα ρωσικά γράφονται με αλφάβητο που λέγεται...", options: [
+        "κυριλλικό",
+        "λατινικό",
+        "αραβικό",
+        "κινεζικό"
+      ], correct: 0 }
+    ] },
+  "Τουρκικά": { l1: { q: "Ποια γειτονική μας χώρα έχει πρωτεύουσα την Άγκυρα;", options: [
+    "Τουρκία",
+    "Ιταλία",
+    "Γαλλία",
+    "Ισπανία"
+  ], correct: 0 },
+    l2: [
+      { q: "1. Ο μπακλαβάς και το κεμπάπ συνδέονται με την κουζίνα της...", options: [
+        "Τουρκίας",
+        "Ολλανδίας",
+        "Ρωσίας",
+        "Γερμανίας"
+      ], correct: 0 },
+      { q: "2. Η Κωνσταντινούπολη βρίσκεται στην...", options: [
+        "Τουρκία",
+        "Ελλάδα",
+        "Ιταλία",
+        "Γαλλία"
+      ], correct: 0 },
+      { q: "3. Το «τσάι» πίνεται στην Τουρκία...", options: [
+        "συνέχεια",
+        "ποτέ",
+        "μόνο τα Χριστούγεννα",
+        "μόνο το καλοκαίρι"
+      ], correct: 0 }
+    ] },
+  "Κινεζικά": { l1: { q: "Το Σινικό Τείχος βρίσκεται στην...", options: [
+    "Κίνα",
+    "Ιαπωνία",
+    "Ινδία",
+    "Αίγυπτο"
+  ], correct: 0 },
+    l2: [
+      { q: "1. Το panda ζει στην...", options: [
+        "Κίνα",
+        "Αφρική",
+        "Βραζιλία",
+        "Ελλάδα"
+      ], correct: 0 },
+      { q: "2. Οι Κινέζοι τρώνε συχνά με...", options: [
+        "ξυλάκια (chopsticks)",
+        "μόνο κουτάλι",
+        "μόνο τα χέρια",
+        "καλαμάκι"
+      ], correct: 0 },
+      { q: "3. Η Κίνα έχει πληθυσμό...", options: [
+        "πάνω από 1 δισεκατομμύριο",
+        "1 εκατομμύριο",
+        "100 χιλιάδες",
+        "10 χιλιάδες"
+      ], correct: 0 }
+    ] },
+  "Ολλανδικά": { l1: { q: "Ποια χώρα φημίζεται για τις τουλίπες και τα ποδήλατα;", options: [
+    "Ολλανδία",
+    "Ισπανία",
+    "Τουρκία",
+    "Ρωσία"
+  ], correct: 0 },
+    l2: [
+      { q: "1. Η πρωτεύουσα της Ολλανδίας είναι το...", options: [
+        "Άμστερνταμ",
+        "Βερολίνο",
+        "Παρίσι",
+        "Δουβλίνο"
+      ], correct: 0 },
+      { q: "2. Στην Ολλανδία οι περισσότεροι πάνε στη δουλειά με...", options: [
+        "ποδήλατο",
+        "καμήλα",
+        "βάρκα",
+        "έλκηθρο"
+      ], correct: 0 },
+      { q: "3. Το τυρί Gouda είναι...", options: [
+        "ολλανδικό",
+        "κινεζικό",
+        "ρωσικό",
+        "τουρκικό"
+      ], correct: 0 }
+    ] },
+  "Πληροφορική": { l1: { q: "Με ποιο πρόγραμμα γράφεις μια εργασία στον υπολογιστή;", options: [
+    "Word",
+    "Ζωγραφική",
+    "Αριθμομηχανή",
+    "Ρολόι"
+  ], correct: 0 },
+    l2: [
+      { q: "1. Το Google το χρησιμοποιείς για να...", options: [
+        "ψάχνεις στο internet",
+        "μαγειρεύεις",
+        "οδηγείς",
+        "κοιμάσαι"
+      ], correct: 0 },
+      { q: "2. Το Wi-Fi σου δίνει...", options: [
+        "internet χωρίς καλώδιο",
+        "νερό",
+        "ρεύμα",
+        "θέρμανση"
+      ], correct: 0 },
+      { q: "3. Το Excel φτιάχνει...", options: [
+        "πίνακες με αριθμούς",
+        "τραγούδια",
+        "βίντεο",
+        "φωτογραφίες"
+      ], correct: 0 }
+    ] }
+};
+
+/* ---------- state ---------- */
+var memoryState = {};
+function load(){
+  try{ return JSON.parse(localStorage.getItem(("assosQuest_"+CONFIG.QUEST_NO))||"{}"); }
+  catch(e){ return memoryState; }
+}
+function save(){
+  try{ localStorage.setItem(("assosQuest_"+CONFIG.QUEST_NO), JSON.stringify(state)); }
+  catch(e){ memoryState = state; }
+}
+var state = load();
+
+/* Παράμετροι δοκιμών στο URL */
+try{
+  if(window.location && window.location.search.indexOf("reset")>-1){
+    try{localStorage.removeItem(("assosQuest_"+CONFIG.QUEST_NO));}catch(e){}
+    state={};
+  }
+var TEST=!!(window.location && window.location.search.indexOf("test")>-1);
+  if(window.location && window.location.search.indexOf("test")>-1){
+    CONFIG.UNLOCK_HOURS = 0;
+  }
+}catch(e){}
+
+var CUR="scrWelcome";
+function show(id){
+  CUR=id;
+  var bb=document.getElementById("backBtn");
+  if(bb){bb.classList.toggle("hidden", id==="scrWelcome"||id==="scrExpired");}
+  var pr=document.querySelector(".progress"), pl=document.querySelector(".p-labels");
+  if(pr){pr.style.display=(id==="scrWelcome")?"none":"";}
+  if(pl){pl.style.display=(id==="scrWelcome")?"none":"";}
+  ["tag","deadline","keepline"].forEach(function(c){
+    var e=document.querySelector("."+c); if(e){e.style.display=(id==="scrWelcome")?"":"none";}
+  });
+  ["scrWelcome","scrStart","scrL1","scrGate","scrWhen","scrL1win","scrL2","scrL2win","scrL3","scrL3b","scrDone","scrExpired"].forEach(function(s){
+    document.getElementById(s).classList.add("hidden");
+  });
+  document.getElementById(id).classList.remove("hidden");
+}
+
+function fmtDeadline(){
+  var p=CONFIG.DEADLINE.split("-");
+  return p[2]+"/"+p[1]+"/"+p[0];
+}
+function isExpired(){
+  return Date.now() > new Date(CONFIG.DEADLINE+"T23:59:59").getTime();
+}
+function fmtPickup(){
+  var p=(CONFIG.PICKUP_DEADLINE||CONFIG.DEADLINE).split("-");
+  return p[2]+"/"+p[1]+"/"+p[0];
+}
+function ordGr(n){ return n+"ο QUEST"; }
+function fillQuestLabels(){
+  var q=CONFIG.QUEST_NO||1;
+  var f=function(cls,txt){var els=document.querySelectorAll("."+cls);for(var i=0;i<els.length;i++)els[i].textContent=txt;};
+  f("qno","QUEST #"+q); f("qord",ordGr(q)); f("qnext","QUEST #"+(q+1));
+}
+function fillStatic(){
+  fillQuestLabels();
+  document.getElementById("dlText").textContent=fmtDeadline();
+  var dls=document.querySelectorAll(".dl");
+  var dls2=document.querySelectorAll(".dl2");
+  for(var k2=0;k2<dls2.length;k2++){dls2[k2].textContent=fmtPickup();}
+  for(var i=0;i<dls.length;i++){dls[i].textContent=fmtDeadline();}
+  document.getElementById("addrLine").innerHTML="Κέντρο Εγγραφών: "+CONFIG.ADDRESS+(CONFIG.ADDRESS2?"<br>"+CONFIG.ADDRESS2:"");
+  var gm=document.getElementById("gMail"); if(gm) gm.textContent=CONFIG.EMAIL;
+  var it=sel().indexOf("Πληροφορική")>-1;
+  var target=(it && CONFIG.SITE_URL_IT) ? CONFIG.SITE_URL_IT : CONFIG.SITE_URL;
+  var sb=document.querySelectorAll("[data-site]");
+  for(var j=0;j<sb.length;j++){sb[j].href=target;}
+}
+
+function setProgress(){
+  var p1=document.getElementById("p1"),p2=document.getElementById("p2"),p3=document.getElementById("p3");
+  [p1,p2,p3].forEach(function(p){p.className="p-step";});
+  if(state.l3done){p1.classList.add("done");p2.classList.add("done");p3.classList.add("done");}
+  else if(state.l2done){p1.classList.add("done");p2.classList.add("done");p3.classList.add("now");}
+  else if(state.l1done){p1.classList.add("done");p2.classList.add("now");}
+  else {p1.classList.add("now");}
+}
+
+function confetti(){
+  var em=["🎉","⭐","💙","🏆","✨"];
+  for(var i=0;i<26;i++){
+    var d=document.createElement("div");
+    d.className="confetti";d.textContent=em[i%em.length];
+    d.style.left=Math.random()*100+"vw";
+    d.style.animationDuration=(2.2+Math.random()*2)+"s";
+    d.style.animationDelay=(Math.random()*0.6)+"s";
+    document.body.appendChild(d);
+    (function(el){setTimeout(function(){el.remove();},5200);})(d);
+  }
+}
+
+/* ---------- flow ---------- */
+function sel(){ return (state.interests && state.interests.length) ? state.interests : (state.interest ? [state.interest] : []); }
+function renderChips(boxId){
+  var box=document.getElementById(boxId||"chips");if(!box)return;box.innerHTML="";
+  var cur=sel();
+  INTERESTS.forEach(function(name){
+    if(name==="Πληροφορική"){
+      var brk=document.createElement("div");brk.className="chip-break";box.appendChild(brk);
+    }
+    var c=document.createElement("button");
+    c.className="chip"+(name==="Πληροφορική"?" it":"")+(cur.indexOf(name)>-1?" sel":"");
+    c.textContent=name;
+    c.onclick=function(){
+      var s=sel().slice();
+      var i=s.indexOf(name);
+      s=[name];                        // μία επιλογή κάθε φορά
+      state.interests=s;state.interest=name;save();
+      renderChips("chips");renderChips("chips3");
+      if(boxId==="chips3"){fillVoucher();document.getElementById("g3name").textContent=grandPrize().name.replace("🏆 ","");}
+    };
+    box.appendChild(c);
+  });
+}
+function goL3b(){ state.l3b=1; save(); show("scrL3b"); setProgress(); }
+function goBack(){
+  if(CUR==="scrL2"){
+    var i=state.l2idx||0;
+    if(i>0){state.l2idx=i-1;save();renderL2();return;}
+    show("scrL1win");return;
+  }
+  if(CUR==="scrL2win"){
+    state.l2idx=l2items().length-1;save();renderL2();show("scrL2");return;
+  }
+  var P={scrStart:"scrWelcome",scrL1:"scrStart",scrWhen:"scrL1",scrGate:"scrWhen",
+         scrL1win:"scrGate",scrL3:"scrL2win",scrL3b:"scrL3",scrDone:"scrL3b"};
+  if(P[CUR]){ if(P[CUR]==="scrL1"){renderL1();} show(P[CUR]); setProgress(); }
+}
+function goStart(){ state.welcomed=1; save(); route(); }
+function startQuest(){
+  if(!sel().length){
+    var box=document.getElementById("chips");
+    box.classList.add("shake");setTimeout(function(){box.classList.remove("shake");},450);
+    return;
+  }
+  state.started=1;
+  save();setProgress();renderL1();show("scrL1");
+}
+
+function bankOf(name){ return BANK[name] || BANK["Αγγλικά"]; }
+function l1item(){
+  var s=sel(); if(!s.length) return BANK["Αγγλικά"].l1;
+  if(state.l1from===undefined||s.indexOf(state.l1from)<0){
+    state.l1from=s[Math.floor(Math.random()*s.length)];save();
+  }
+  return bankOf(state.l1from).l1;
+}
+function l2items(){
+  // 3 ερωτήσεις μοιρασμένες κυκλικά στα δηλωμένα ενδιαφέροντα
+  var s=sel(); if(!s.length) s=["Αγγλικά"];
+  var out=[];
+  for(var i=0;i<3;i++){
+    var name=s[i%s.length]; var qi=Math.floor(i/s.length)%3;
+    var q=bankOf(name).l2[qi];
+    out.push({q:(i+1)+". "+q.q.replace(/^\d+\.\s*/,""), options:q.options, correct:q.correct, from:name});
+  }
+  return out;
+}
+function renderL1(){
+  var item=l1item();
+  document.getElementById("q1text").textContent=item.q;
+  var box=document.getElementById("q1");box.innerHTML="";
+  item.options.forEach(function(opt,i){
+    var b=document.createElement("button");
+    b.className="opt";b.textContent=opt;
+    b.onclick=function(){answerL1(i,b);};
+    box.appendChild(b);
+  });
+}
+function answerL1(i,btn){
+  var m=document.getElementById("msg1");m.classList.remove("hidden");
+  if(i===l1item().correct){
+    btn.classList.add("ok");m.className="msg ok";m.textContent="Σωστό! Mission complete. 🎯";
+    state.l1done=Date.now();save();confetti();
+    setTimeout(function(){ if(TEST && !state.gate){state.who={n:"Προεπισκόπηση",p:"",em:""};state.when="ΤΩΡΑ";state.gate=1;save();} if(state.gate){enterL1win();} else {show(state.when?"scrGate":"scrWhen");setProgress();} },900);
+  }else{
+    btn.classList.add("bad");m.className="msg bad";m.textContent="Όχι ακριβώς — δοκίμασε ξανά.";
+    setTimeout(function(){btn.classList.remove("bad");},700);
+  }
+}
+function rewardFor(interest, lvl){
+  var R=CONFIG.REWARDS||{}; var d=(R.DEFAULT||{})[lvl]||{};
+  var s=(R[interest]||{})[lvl];
+  return s||d;
+}
+function renderRewards(boxId, lvl, eyebrow){
+  var box=document.getElementById(boxId); if(!box) return; box.innerHTML="";
+  var s=sel(); if(!s.length) s=["Αγγλικά"];
+  // ένα δώρο ανά αντικείμενο, χωρίς διπλότυπα (αν δύο γλώσσες έχουν το ίδιο DEFAULT, δείχνει μία φορά)
+  var seen={};
+  s.forEach(function(x){
+    var r=rewardFor(x,lvl); var key=r.name;
+    if(seen[key]) return; seen[key]=1;
+    var div=document.createElement("div"); div.className="reward";
+    var custom=(CONFIG.REWARDS[x]&&CONFIG.REWARDS[x][lvl]);
+    div.innerHTML='<div class="r-eyebrow">'+eyebrow+(custom?' · '+x:'')+'</div>'
+      +'<div class="r-name">'+(r.icon||"🎁")+' '+r.name+'</div>'
+      +'<p>'+(r.desc||"")+'</p>'
+      +(r.url?'<a class="btn" href="'+r.url+'">🎁 Άνοιξέ το</a><div class="keepnote">Ανοίγει στον browser — κράτα το link ή πρόσθεσέ το στους σελιδοδείκτες: είναι δικό σου για πάντα.</div>'
+             :'<div class="pickup" style="margin-top:10px;">📍 Παραλαβή στα ASSOS με την κάρτα σου</div>');
+    box.appendChild(div);
+  });
+}
+function enterL1win(){
+  renderRewards("rewardsL1","l1","Το πρώτο σου δώρο");
+  setProgress();show("scrL1win");
+  if(window.cdInt)clearInterval(window.cdInt);
+  if(CONFIG.UNLOCK_HOURS<=0){
+    document.getElementById("cdBlock").classList.add("hidden");
+    document.getElementById("goBlock").classList.remove("hidden");
+  }else{
+    document.getElementById("goBlock").classList.add("hidden");
+    document.getElementById("cdBlock").classList.remove("hidden");
+    tick();
+    window.cdInt=setInterval(tick,1000);
+  }
+}
+function tick(){
+  var unlock=state.l1done+CONFIG.UNLOCK_HOURS*3600*1000;
+  var left=unlock-Date.now();
+  var el=document.getElementById("cd1");
+  if(left<=0){
+    if(window.cdInt)clearInterval(window.cdInt);
+    el.textContent="00:00:00";
+    enterL2();
+    return;
+  }
+  var h=Math.floor(left/3600000),mn=Math.floor(left%3600000/60000),s=Math.floor(left%60000/1000);
+  el.textContent=("0"+h).slice(-2)+":"+("0"+mn).slice(-2)+":"+("0"+s).slice(-2);
+}
+
+function enterL2(){
+  setProgress();renderL2();show("scrL2");
+}
+var l2answers=[];
+function renderL2(){
+  var items=l2items(); var idx=state.l2idx||0;
+  if(idx>=items.length){enterL2win();return;}
+  var item=items[idx];
+  document.getElementById("l2counter").textContent="ΕΡΩΤΗΣΗ "+(idx+1)+" / "+items.length;
+  var wrap=document.getElementById("q2wrap");wrap.innerHTML="";
+  var mg=document.getElementById("msg2");mg.classList.add("hidden");
+  var q=document.createElement("div");q.className="q";q.textContent=item.q.replace(/^\d+\.\s*/,"");wrap.appendChild(q);
+  item.options.forEach(function(opt,oi){
+    var b=document.createElement("button");b.className="opt";b.textContent=opt;
+    b.onclick=function(){answerL2(oi,b);};
+    wrap.appendChild(b);
+  });
+}
+function answerL2(oi,btn){
+  var items=l2items(); var idx=state.l2idx||0; var item=items[idx];
+  var mg=document.getElementById("msg2");mg.classList.remove("hidden");
+  if(oi===item.correct){
+    btn.classList.add("ok");
+    mg.className="msg ok";mg.textContent="Σωστό! ✓";
+    state.l2idx=idx+1;save();
+    if(state.l2idx>=items.length){
+      state.l2done=Date.now();save();confetti();
+      setTimeout(function(){enterL2win();},800);
+    }else{
+      setTimeout(function(){renderL2();},650);
+    }
+  }else{
+    mg.className="msg bad";mg.textContent="Όχι αυτό — σκέψου το ξανά!";
+  }
+}
+
+function discountFor(interest){
+  return (CONFIG.DISCOUNTS && CONFIG.DISCOUNTS[interest]) || CONFIG.DISCOUNT_DEFAULT;
+}
+var GEN={"Αγγλικά":"Αγγλικών","Γαλλικά":"Γαλλικών","Γερμανικά":"Γερμανικών","Ισπανικά":"Ισπανικών",
+         "Ιταλικά":"Ιταλικών","Ρωσικά":"Ρωσικών","Τουρκικά":"Τουρκικών","Κινεζικά":"Κινεζικών","Ολλανδικά":"Ολλανδικών","Πληροφορική":"Πληροφορικής"};
+function whatLabel(list){ var d=discountFor(list[0]||"Αγγλικά"); return d.what||("στα τμήματα "+(GEN[list[0]]||list[0]||"")); }
+function pctLabel(list){ var d=discountFor(list[0]||"Αγγλικά"); return d.big||("-"+d.pct); }
+function codesText(list){
+  return list.map(function(x){var d=discountFor(x);return x+": "+d.code+" ("+(d.big||d.pct)+")";}).join(" · ");
+}
+function enterL2win(){
+  renderRewards("rewardsL2","l2","Δώρο #2");
+  setProgress();show("scrL2win");
+}
+function fillVoucher(){
+  var s=sel(); if(!s.length) s=["Αγγλικά"];
+  document.getElementById("vPct").textContent=pctLabel(s);
+  document.getElementById("vWhat").textContent=whatLabel(s);
+  var tEl=document.getElementById("vTerms"); if(tEl){tEl.textContent=(discountFor(s[0]||"Αγγλικά").terms||"Με την εγγραφή σου.")+" ·";}
+  var codeEl=document.getElementById("discCode");
+  codeEl.innerHTML=s.map(function(x){var d=discountFor(x);
+    return '<div style="font-size:15px;letter-spacing:.12em;">'+d.code+'</div>';}).join("");
+  fillStatic();
+}
+
+function grandPrize(){
+  var s=sel(); if(!s.length) s=["Αγγλικά"];
+  var names=[], descs=[], seen={};
+  s.forEach(function(x){
+    var r=rewardFor(x,"l3"); if(seen[r.name]) return; seen[r.name]=1;
+    names.push(r.name); descs.push(r.desc||"");
+  });
+  return {name:"🏆 "+names.join(" + "), desc:descs.join(" ")+" Είναι ήδη δικό σου — αρκεί να έρθεις."};
+}
+function enterL3(){
+  fillVoucher();
+  var g=grandPrize();
+  document.getElementById("g3name").textContent=g.name.replace("🏆 ","");
+  state.seenL3=1;save();setProgress();prefillL3();show(state.l3b?"scrL3b":"scrL3");
+}
+
+/* ---------- Αποστολή στοιχείων στη Google Form, στο παρασκήνιο (χωρίς να ανοίξει τίποτα) ---------- */
+function sendToForm(n,p,em,l,codes){
+  var gf=CONFIG.GOOGLE_FORM; if(!gf||!gf.url) return false;
+  var e=gf.entries||{};
+  var fd=new FormData();
+  fd.append(e.name,n); fd.append(e.phone,p); fd.append(e.email,em);
+  fd.append(e.interest,l); fd.append(e.codes,codes);
+  if(e.consent && gf.consentValue) fd.append(e.consent,gf.consentValue);
+  var u=gf.url.replace(/\/viewform.*$/,"/formResponse");
+  try{ fetch(u,{method:"POST",mode:"no-cors",body:fd}); }catch(err){}
+  return true;
+}
+var WHEN="";
+function pickWhen(btn){
+  WHEN=btn.getAttribute("data-w");
+  var cs=document.querySelectorAll("#whenChips .chip");
+  for(var i=0;i<cs.length;i++){cs[i].classList.toggle("sel",cs[i]===btn);}
+  state.when=WHEN; save();
+  setTimeout(function(){show("scrGate");setProgress();},350);
+}
+function interestLabel(){ return sel().join(", ")+(state.when?" — "+state.when:""); }
+function submitGate(){
+  var n=document.getElementById("gName").value.trim();
+  var p=document.getElementById("gPhone").value.trim();
+  var em=document.getElementById("gEmail").value.trim();
+  var c=document.getElementById("gConsent").checked;
+  var m=document.getElementById("msgGate");
+  var okPhone=/^\+?\d[\d\s]{8,}$/.test(p), okMail=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em);
+  if(!n||!p||!em){m.classList.remove("hidden");m.className="msg bad";m.textContent="Συμπλήρωσε όνομα, τηλέφωνο και email.";return;}
+  if(!okPhone){m.classList.remove("hidden");m.className="msg bad";m.textContent="Έλεγξε το τηλέφωνο — π.χ. 69XXXXXXXX.";return;}
+  if(!okMail){m.classList.remove("hidden");m.className="msg bad";m.textContent="Έλεγξε το email.";return;}
+  if(!c){m.classList.remove("hidden");m.className="msg bad";m.textContent="Χρειάζεται η συγκατάθεσή σου για να συνεχίσεις.";return;}
+  if(!state.when){show("scrWhen");return;}
+  state.who={n:n,p:p,em:em}; state.gate=Date.now();
+  var l=interestLabel(); state.sentFor=l;
+  sendToForm(n,p,em,l,codesText(sel()));
+  save(); confetti(); enterL1win();
+}
+function bookTrial(){
+  var m=document.getElementById("msg3");
+  if(!sel().length){
+    m.classList.remove("hidden");m.className="msg bad";
+    m.textContent="Διάλεξε τουλάχιστον ένα ενδιαφέρον.";return;
+  }
+  var w=state.who||{}; var l=interestLabel();
+  // αν άλλαξε τα ενδιαφέροντα από την αρχική δήλωση, στέλνουμε ενημερωμένη γραμμή
+  if(l!==state.sentFor){ sendToForm(w.n||"",w.p||"",w.em||"",l,codesText(sel())); state.sentFor=l; }
+  state.l3done=Date.now();save();setProgress();
+  document.getElementById("doneCode").textContent=pctLabel(sel())+" "+whatLabel(sel());
+  confetti();show("scrDone");
+}
+function shareQuest(){
+  var url=window.location.href.split("?")[0];
+  var data={title:"ASSOS QUEST",text:"Παίξε το ASSOS QUEST — 3 levels, 3 δώρα, στο κινητό σου:",url:url};
+  if(navigator.share){ navigator.share(data).catch(function(){}); return; }
+  var ta=document.createElement("textarea");ta.value=url;document.body.appendChild(ta);ta.select();
+  try{document.execCommand("copy");}catch(e){} document.body.removeChild(ta);
+  alert("Ο σύνδεσμος αντιγράφηκε — στείλ' τον στην παρέα!");
+}
+function callUs(){window.location.href="tel:"+CONFIG.PHONE;}
+function confirmReset(){
+  if(confirm("Θα ξεκινήσει νέο quest — η οθόνη-εισιτήριο με το όνομά σου θα σβηστεί από αυτή τη συσκευή (φρόντισε να την έχεις δείξει ή φωτογραφίσει). Συνέχεια;")) resetQuest();
+}
+function resetQuest(){
+  try{localStorage.removeItem(("assosQuest_"+CONFIG.QUEST_NO));}catch(e){}
+  memoryState={};state={};
+  if(window.cdInt)clearInterval(window.cdInt);
+  route();
+}
+function prefillL3(){
+  renderChips("chips3"); var w=state.who||{}; document.getElementById("fWho").textContent=w.n||"—";
+  var b=document.getElementById("btnBook");
+  b.textContent=(state.when==="ΤΩΡΑ"||state.when==="ΙΑΝΟΥΑΡΙΟΣ")?"Κράτησέ το — και καλέστε με":"Κράτησε το έπαθλό μου";
+}
+
+/* ---------- εξωτερικές ερωτήσεις: questions.json ----------
+   Δομή: { "rotations": [ { "from":"2026-09-14", "label":"...", "bank":{ ...ίδια δομή με BANK... } }, ... ] }
+   Επιλέγεται η τελευταία rotation με from <= σήμερα. Αν το αρχείο λείπει/έχει λάθος → οι ενσωματωμένες. */
+function validBank(b){
+  if(!b) return false;
+  for(var i=0;i<INTERESTS.length;i++){
+    var x=b[INTERESTS[i]]; if(!x||!x.l1||!x.l1.options||typeof x.l1.correct!=="number") return false;
+    if(!x.l2||x.l2.length<3) return false;
+  }
+  return true;
+}
+function applyRotations(json){
+  var rots=(json&&json.rotations)||[]; var today=Date.now(); var chosen=null;
+  rots.forEach(function(r){ if(r.from && new Date(r.from+"T00:00:00").getTime()<=today) chosen=r; });
+  if(chosen && validBank(chosen.bank)){ BANK=chosen.bank; window.activeRotation=chosen.label||chosen.from; return true; }
+  return false;
+}
+var booted=false;
+function boot(){ if(booted) return; booted=true; route(); }
+if(CONFIG.QUESTIONS_FILE){
+  try{
+    fetch(CONFIG.QUESTIONS_FILE+"?v="+Date.now(),{cache:"no-store"})
+      .then(function(r){return r.json();})
+      .then(function(j){applyRotations(j);boot();})
+      .catch(function(){boot();});
+    setTimeout(boot,1500); // ασφάλεια: αν αργήσει, ξεκινάμε με τις ενσωματωμένες
+  }catch(e){boot();}
+}else{ boot(); }
+
+/* ---------- routing στην είσοδο (κάθε νέο scan) ---------- */
+function route(){
+  fillStatic();setProgress();renderChips("chips");
+  if(isExpired()){show("scrExpired");return;}
+  if(!state.gate && !TEST && (state.l2done||state.l3done)){show(state.when?"scrGate":"scrWhen");return;}
+  if(state.l3done){document.getElementById("doneCode").textContent=pctLabel(sel())+" "+whatLabel(sel());show("scrDone");return;}
+  if(state.l2done){
+    if(state.seenL3){fillVoucher();document.getElementById("g3name").textContent=grandPrize().name.replace("🏆 ","");prefillL3();show(state.l3b?"scrL3b":"scrL3");}
+    else{enterL2win();}
+    return;
+  }
+  if(TEST && !state.gate){state.who={n:"Προεπισκόπηση",p:"",em:""};state.when="ΤΩΡΑ";state.gate=1;state.sentFor="";save();}
+  if(state.l1done && !state.gate){show(state.when?"scrGate":"scrWhen");return;}
+  if(state.l1done){enterL1win();return;}
+  if(state.started){renderL1();show("scrL1");return;}
+  if(state.welcomed){show("scrStart");}else{show("scrWelcome");}
+}
+</script>
+</body>
+</html>
