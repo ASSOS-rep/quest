@@ -197,7 +197,7 @@
     <p class="bright">Διάλεξε την αποστολή σου:</p>
     <div class="chips" id="chips"></div>
     <p style="margin:-6px 0 14px;font-size:12px;"><strong>Διάλεξε ένα</strong> — οι ερωτήσεις, τα δώρα και η έκπτωση προσαρμόζονται σε αυτό. Την τελική επιλογή την κάνεις στη γραμματεία — το δώρο ισχύει για όποιο πρόγραμμα διαλέξεις τελικά.</p>
-    <button class="btn" onclick="startQuest()">Ξεκίνα το LEVEL 1</button>
+    <button class="btn hidden" id="btnStart" onclick="startQuest()">Ξεκίνα το LEVEL 1</button>
   </div>
 
   <!-- ═══════ LEVEL 1 ═══════ -->
@@ -225,7 +225,7 @@
     <div style="margin-top:6px;"><a href="#" onclick="var g=document.getElementById('gdprBox');g.classList.toggle('hidden');return false;" style="font-size:11.5px;color:var(--muted);font-weight:800;">📄 Δες αναλυτικά πώς επεξεργαζόμαστε τα στοιχεία σου (GDPR)</a></div>
     <div id="gdprBox" class="hidden" style="margin-top:8px;max-height:240px;overflow:auto;background:rgba(255,255,255,.05);border:1px solid rgba(168,198,240,.25);border-radius:12px;padding:12px 14px;font-size:11.5px;line-height:1.55;color:#C7D2EE;font-weight:600;text-align:left;">
       <b style="color:#fff;">Επεξεργασία προσωπικών δεδομένων — ASSOS QUEST</b><br>
-      <b>Υπεύθυνος επεξεργασίας:</b> Κ. Ευθυμίου &amp; ΣΙΑ Ο.Ε. (τα ASSOS), Εγνατίας 144, 546 22 Θεσσαλονίκη · assoslingua@gmail.com · 2310 235 777.<br>
+      <b>Υπεύθυνος επεξεργασίας:</b> Κ. Ευθυμίου &amp; ΣΙΑ Ο.Ε. (τα ASSOS), Εγνατίας 144, 546 22 Θεσσαλονίκη · assoslingua@gmail.com · 2310 235 777-6.<br>
       <b>Ποια στοιχεία:</b> ονοματεπώνυμο, τηλέφωνο, email, ενδιαφέρον σπουδών, κωδικοί δώρων.<br>
       <b>Σκοπός:</b> επικοινωνία για τη συμμετοχή σου στο ASSOS QUEST (παράδοση δώρων/επάθλου) και ενημέρωση για τα προγράμματα και τις υπηρεσίες των ASSOS.<br>
       <b>Νομική βάση:</b> η συγκατάθεσή σου.<br>
@@ -790,6 +790,10 @@ function sel(){ return (state.interests && state.interests.length) ? state.inter
 function renderChips(boxId){
   var box=document.getElementById(boxId||"chips");if(!box)return;box.innerHTML="";
   var cur=sel();
+  if(boxId!=="chips3"){
+    var bs0=document.getElementById("btnStart");
+    if(bs0){bs0.classList.toggle("hidden",cur.length===0);}
+  }
   INTERESTS.forEach(function(name){
     if(name==="Πληροφορική"){
       var brk=document.createElement("div");brk.className="chip-break";box.appendChild(brk);
@@ -804,6 +808,11 @@ function renderChips(boxId){
       state.interests=s;state.interest=name;save();
       renderChips("chips");renderChips("chips3");
       if(boxId==="chips3"){fillVoucher();document.getElementById("g3name").textContent=grandPrize().name.replace("🏆 ","");}
+      if(boxId!=="chips3"){
+        var bs=document.getElementById("btnStart");
+        if(bs){bs.classList.remove("hidden");
+          setTimeout(function(){bs.scrollIntoView({behavior:"smooth",block:"center"});},60);}
+      }
     };
     box.appendChild(c);
   });
