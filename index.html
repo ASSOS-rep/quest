@@ -717,6 +717,7 @@ var TEST=!!(window.location && window.location.search.indexOf("test")>-1);
 var CUR="scrWelcome";
 function show(id){
   CUR=id;
+  if(id==="scrL1next"){setTimeout(updateUnlockBlocks,0);}
   var bb=document.getElementById("backBtn");
   if(bb){bb.classList.toggle("hidden", id==="scrWelcome"||id==="scrExpired");}
   var pr=document.querySelector(".progress"), pl=document.querySelector(".p-labels");
@@ -910,9 +911,7 @@ function renderRewards(boxId, lvl, eyebrow){
     box.appendChild(div);
   });
 }
-function enterL1win(){
-  renderRewards("rewardsL1","l1","Το πρώτο σου δώρο");
-  setProgress();show("scrL1win");
+function updateUnlockBlocks(){
   if(window.cdInt)clearInterval(window.cdInt);
   if(CONFIG.UNLOCK_HOURS<=0){
     document.getElementById("cdBlock").classList.add("hidden");
@@ -923,6 +922,11 @@ function enterL1win(){
     tick();
     window.cdInt=setInterval(tick,1000);
   }
+}
+function enterL1win(){
+  renderRewards("rewardsL1","l1","Το πρώτο σου δώρο");
+  setProgress();show("scrL1win");
+  updateUnlockBlocks();
 }
 function tick(){
   var unlock=state.l1done+CONFIG.UNLOCK_HOURS*3600*1000;
