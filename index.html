@@ -325,6 +325,7 @@
       <span class="lvl-title">Τα λέμε στα ASSOS!</span></div>
     <p class="bright" style="margin-top:4px;">Κλειδωμένο στο όνομα: <strong id="fWho"></strong></p>
     <div class="code" id="discCode" style="margin:10px auto;">ASSOS-XX</div>
+    <p style="background:rgba(57,210,255,.1);border:1.5px solid rgba(57,210,255,.4);border-radius:12px;padding:10px 12px;margin:10px 0 4px;font-size:13px;font-weight:800;">📸 <strong style="color:#39D2FF;">Κράτησε screenshot αυτή την οθόνη</strong> — με το όνομα και τον κωδικό σου. Είναι το εισιτήριό σου για την παραλαβή.</p>
     <div class="pickup">📍 <strong>Αυτή η οθόνη είναι το εισιτήριό σου.</strong> Έλα με αυτήν στα ASSOS έως <span class="dl2"></span> να παραλάβεις το έπαθλό σου — η έκπτωση <strong id="doneCode"></strong> σε περιμένει στη γραμματεία. Θα σε καλέσουμε κι εμείς.<br><span id="addrLine"></span></div>
     <p style="margin-top:12px;font-size:12.5px;"><strong>Άλλαξες γνώμη;</strong> Το δώρο ισχύει για όποιο πρόγραμμα διαλέξεις τελικά — γλώσσα ή πληροφορική.</p>
     <button class="btn gold" onclick="goDone2()" style="margin-top:12px;">Συνέχεια ▸</button>
@@ -359,7 +360,7 @@ var CONFIG = {
   PHONE: "+302310235777",              // τηλέφωνο φροντιστηρίου
   ADDRESS: "Εγνατίας 144, 546 22, Θεσσαλονίκη",
   ADDRESS2: "Παράρτημα: Εγνατίας 116, 546 22, Θεσσαλονίκη",                         // προαιρετικά: διεύθυνση, π.χ. "Λ. Παπάγου 10, Ζωγράφου"
-  DEADLINE: "2026-09-25",              // πότε λήγει το quest (ΕΤΟΣ-ΜΗΝΑΣ-ΜΕΡΑ)
+  DEADLINE: "2026-10-15",              // πότε λήγει το quest (ΕΤΟΣ-ΜΗΝΑΣ-ΜΕΡΑ)
   DISCOUNT_DEFAULT: { pct: "15%", code: "ASSOS-Q26" },   // αν λείπει το αντικείμενο από τη λίστα
   DISCOUNTS: {                          // το μεγάλο δώρο ανά αντικείμενο: big = ο μεγάλος τίτλος, what = η γραμμή από κάτω, code = ο κωδικός
     "Αγγλικά":     { big:"100€", what:"πίστωση στα δίδακτρα Αγγλικών", terms:"Η πίστωση των 100€ αφαιρείται από την τελευταία δόση, σε 8μηνο ομαδικό πρόγραμμα.", code:"ASSOS-EN26" },
@@ -377,7 +378,7 @@ var CONFIG = {
   UNLOCK_HOURS: 0,                     // 0 = το Level 2 ανοίγει αμέσως. Αν θες αναμονή, βάλε π.χ. 48
   SITE_URL: "https://assos.edu.gr",
   SITE_URL_IT: "",                     // link σελίδας Πληροφορικής στο site — αν οριστεί, όσοι δήλωσαν Πληροφορική πάνε κατευθείαν εκεί
-  PICKUP_DEADLINE: "2026-09-30",       // έως πότε παραλαμβάνονται τα έπαθλα  // κουμπί «Δες το site» στο τέλος
+  PICKUP_DEADLINE: "2026-10-15",       // έως πότε παραλαμβάνονται τα έπαθλα  // κουμπί «Δες το site» στο τέλος
   /* ΔΩΡΑ ΑΝΑ ΑΝΤΙΚΕΙΜΕΝΟ. Ό,τι λείπει → χρησιμοποιείται το DEFAULT.
      Τα url είναι ΣΧΕΤΙΚΑ: τα αρχεία των ebooks ανεβαίνουν στον ίδιο φάκελο με το index.html — δεν χρειάζεται domain.
      l1/l2: ψηφιακά δώρα (icon, name, desc, url = link για κατέβασμα, ή "" αν παραλαμβάνεται στα ASSOS)
