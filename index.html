@@ -360,7 +360,7 @@ var CONFIG = {
   PHONE: "+302310235777",              // τηλέφωνο φροντιστηρίου
   ADDRESS: "Εγνατίας 144, 546 22, Θεσσαλονίκη",
   ADDRESS2: "Παράρτημα: Εγνατίας 116, 546 22, Θεσσαλονίκη",                         // προαιρετικά: διεύθυνση, π.χ. "Λ. Παπάγου 10, Ζωγράφου"
-  DEADLINE: "2026-11-15",              // πότε λήγει το quest (ΕΤΟΣ-ΜΗΝΑΣ-ΜΕΡΑ)
+  DEADLINE: "",                        // πότε λήγει το quest (ΕΤΟΣ-ΜΗΝΑΣ-ΜΕΡΑ) — ΚΕΝΟ = δεν λήγει ποτέ
   DISCOUNT_DEFAULT: { pct: "15%", code: "ASSOS-Q26" },   // αν λείπει το αντικείμενο από τη λίστα
   DISCOUNTS: {                          // το μεγάλο δώρο ανά αντικείμενο: big = ο μεγάλος τίτλος, what = η γραμμή από κάτω, code = ο κωδικός
     "Αγγλικά":     { big:"100€", what:"πίστωση στα δίδακτρα Αγγλικών", terms:"Η πίστωση των 100€ αφαιρείται από την τελευταία δόση, σε 8μηνο ομαδικό πρόγραμμα.", code:"ASSOS-EN26" },
@@ -378,7 +378,7 @@ var CONFIG = {
   UNLOCK_HOURS: 0,                     // 0 = το Level 2 ανοίγει αμέσως. Αν θες αναμονή, βάλε π.χ. 48
   SITE_URL: "https://assos.edu.gr",
   SITE_URL_IT: "",                     // link σελίδας Πληροφορικής στο site — αν οριστεί, όσοι δήλωσαν Πληροφορική πάνε κατευθείαν εκεί
-  PICKUP_DEADLINE: "2026-11-29",       // έως πότε παραλαμβάνονται τα έπαθλα  // κουμπί «Δες το site» στο τέλος
+  PICKUP_DEADLINE: "2027-03-31",       // έως πότε παραλαμβάνονται τα έπαθλα  // κουμπί «Δες το site» στο τέλος
   /* ΔΩΡΑ ΑΝΑ ΑΝΤΙΚΕΙΜΕΝΟ. Ό,τι λείπει → χρησιμοποιείται το DEFAULT.
      Τα url είναι ΣΧΕΤΙΚΑ: τα αρχεία των ebooks ανεβαίνουν στον ίδιο φάκελο με το index.html — δεν χρειάζεται domain.
      l1/l2: ψηφιακά δώρα (icon, name, desc, url = link για κατέβασμα, ή "" αν παραλαμβάνεται στα ASSOS)
@@ -725,7 +725,7 @@ function show(id){
   if(pr){pr.style.display=(id==="scrWelcome")?"none":"";}
   if(pl){pl.style.display=(id==="scrWelcome")?"none":"";}
   ["tag","deadline","keepline"].forEach(function(c){
-    var e=document.querySelector("."+c); if(e){e.style.display=(id==="scrWelcome")?"":"none";}
+    var e=document.querySelector("."+c); if(e){e.style.display=(id==="scrWelcome"&&!(c==="deadline"&&!CONFIG.DEADLINE))?"":"none";}
   });
   ["scrWelcome","scrStart","scrL1","scrGate","scrWhen","scrL1win","scrL1next","scrL2","scrL2win","scrL2next","scrL3","scrL3b","scrDone","scrDone2","scrExpired"].forEach(function(s){
     document.getElementById(s).classList.add("hidden");
@@ -734,10 +734,12 @@ function show(id){
 }
 
 function fmtDeadline(){
+  if(!CONFIG.DEADLINE) return "";
   var p=CONFIG.DEADLINE.split("-");
   return p[2]+"/"+p[1]+"/"+p[0];
 }
 function isExpired(){
+  if(!CONFIG.DEADLINE) return false;
   return Date.now() > new Date(CONFIG.DEADLINE+"T23:59:59").getTime();
 }
 function fmtPickup(){
@@ -753,6 +755,7 @@ function fillQuestLabels(){
 function fillStatic(){
   fillQuestLabels();
   document.getElementById("dlText").textContent=fmtDeadline();
+  if(!CONFIG.DEADLINE){var dlBox=document.querySelector(".deadline");if(dlBox)dlBox.style.display="none";}
   var dls=document.querySelectorAll(".dl");
   var dls2=document.querySelectorAll(".dl2");
   for(var k2=0;k2<dls2.length;k2++){dls2[k2].textContent=fmtPickup();}
